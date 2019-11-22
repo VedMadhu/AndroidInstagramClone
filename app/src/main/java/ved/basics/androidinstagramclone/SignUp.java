@@ -8,10 +8,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.shashank.sony.fancytoastlib.FancyToast;
+
+import java.util.List;
 
 
 public class SignUp extends AppCompatActivity {
@@ -20,6 +25,9 @@ public class SignUp extends AppCompatActivity {
     private TextView name;
     private TextView kickSpeed;
     private TextView punchSpeed;
+    private TextView txtGetData;
+    private Button getAllData;
+    private String allData;
 
 
 
@@ -28,6 +36,58 @@ public class SignUp extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        txtGetData = findViewById(R.id.txtGetData);
+        getAllData = findViewById(R.id.getAllData);
+
+        getAllData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                allData = "";
+
+                ParseQuery<ParseObject> queryAll = ParseQuery.getQuery("Boxer");
+                queryAll.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> objects, ParseException e) {
+                        if(e==null){
+                            if(objects.size() > 0){
+
+                                for(ParseObject parseObject : objects){
+                                    allData = allData + parseObject.get("name") + "\n";
+                                }
+
+                                FancyToast.makeText(SignUp.this,
+                                        "All Data Arrived Successfully"
+                                        ,FancyToast.LENGTH_LONG,
+                                        FancyToast.SUCCESS,
+                                        false).show();
+                                Toast.makeText(SignUp.this,allData, FancyToast.LENGTH_SHORT ).show();
+
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        txtGetData.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                txtGetData.setText("getting data from the server");
+                ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("Boxer");
+                parseQuery.getInBackground("zHXpaPQ0qh", new GetCallback<ParseObject>() {
+                    @Override
+                    public void done(ParseObject object, ParseException e) {
+                        if(object != null && e == null){
+                                txtGetData.setText("name is :" + object.get("name") );
+                        }
+                        else{
+                            txtGetData.setText(e.getMessage() + "");
+                        }
+                    }
+                });
+            }
+        });
     }
     public void saveButtonClicked(View view)
     {
